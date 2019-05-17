@@ -6,15 +6,16 @@ public class PlayerController : MonoBehaviour
 {
     public float speed = 100f;
     public float jump_force = 200f;
-    public int jump_times = 1;
+    public int jump_value = 2;
     
     private float xMove;
     private bool jump;
+    private int jump_times;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private Animator anim;
     
-    // Floor checking
+    // Floor checking vars
     private bool isGrounded;
     public Transform groundCheck;
     public float checkRadius;
@@ -28,35 +29,37 @@ public class PlayerController : MonoBehaviour
 
 
     void FixedUpdate() {
+        // Floor checking
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatIsGround);
-        xMove = Input.GetAxisRaw("Horizontal");
+
 
         anim.SetFloat("Speed", Mathf.Abs(xMove));
         anim.SetFloat("yVel", rb.velocity.y);
         anim.SetBool("onGround", isGrounded);
 
+        // Horizontal movement
+        xMove = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(xMove * speed * Time.deltaTime, rb.velocity.y);
 
-        // Flip
+        // Flipping
         if (xMove > 0) {
             sr.flipX = false;
         } else if (xMove < 0) {
             sr.flipX = true;
         }
+
+        // Jumping
+        if (isGrounded == true) {
+            jump_times = jump_value;
+        }
+        if (jump == true && jump_times > 0) {   
+            rb.velocity = Vector2.up * jump_force * Time.deltaTime;
+            jump_times--;
+        }
     }
 
     void Update() {
         jump = Input.GetButtonDown("Jump");
-        if (isGrounded == true) {
-            jump_times = 1;
-        }
-        
-        if (jump == true && jump_times > 0) {
-            rb.velocity = Vector2.up * jump_force * Time.deltaTime;
-            jump_times--;
-        }
-        Debug.Log(jump_times);
-        Debug.Log(jump);
     }
 }
 
